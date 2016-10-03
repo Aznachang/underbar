@@ -7,6 +7,7 @@
   // seem very useful, but remember it--if a function needs to provide an
   // iterator when the user does not pass one in, this will be handy.
   _.identity = function(val) {
+    return val;
   };
 
   /**
@@ -37,6 +38,15 @@
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
+    if (n === undefined) {
+      return array[array.length - 1];
+    } else if(n === 0) {
+      return [];
+    } else {
+      return array.slice(-n);
+  }
+    //return n === undefined ? array[array.length-1] : array.slice(-n);
+   
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -45,6 +55,17 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
+      if(Array.isArray(collection)){
+        for(var key=0; key<collection.length; key++){
+          //iterator(value, index, collection)
+          iterator(collection[key], key, collection);
+        }
+      }else{
+        for(var objKey in collection){
+          //iterator(value, index, collection)
+          iterator(collection[objKey], objKey, collection);
+        }
+      }
   };
 
   // Returns the index at which value can be found in the array, or -1 if value
@@ -56,6 +77,7 @@
     var result = -1;
 
     _.each(array, function(item, index) {
+      //capture the first instance where an element in [array] === target
       if (item === target && result === -1) {
         result = index;
       }
@@ -66,16 +88,46 @@
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
+      var result = [];
+      //(collection, anonymous function)
+      _.each(collection, function(item){
+        //test === boolean test
+        if(test(item)){
+          result.push(item);
+        }
+      });
+      return result;
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
+    var result = [];
+      //(collection, anonymous function)
+      _.each(collection, function(item){
+        //test === boolean test
+        if(!test(item)){
+          result.push(item);
+        }
+      });
+      return result;
+
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
+    var result = [];
+    var isFound; //boolean to see if it is found
+    _.each(array, function(item){
+                        //(array, index)
+      isFound = _.indexOf(result, item);
+      if(isFound === -1){
+        result.push(item); 
+      }
+    });
+
+    return result;
   };
 
 
@@ -84,6 +136,11 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var result = [];
+    _.each(collection, function(item){
+      result.push(iterator(item));
+    });
+    return result;
   };
 
   /*
@@ -125,6 +182,33 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    var total;
+    var first = true;
+    /*_.each(collection, function(num){
+
+    });
+
+    if(arguments.length ===3)
+      return total + accumulator;*/
+
+    if(arguments.length === 3){
+      total = accumulator;
+        _.each(collection, function(num){
+          total = iterator(total,num);
+        });
+      }
+    else{          
+          //total = collection[0];      
+                            //(val, index)
+          _.each(collection, function(num){
+            if(first){
+              total = collection[0];      
+              first = false;
+            }else
+              total = iterator(total, num);
+          });
+        }
+    return total;
   };
 
   // Determine if the array or object contains a given value (using `===`).
