@@ -212,6 +212,7 @@
   };
 
   // Determine if the array or object contains a given value (using `===`).
+  //Boolean - 'true' or 'false'
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
@@ -227,6 +228,12 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function(wasFound, item){
+      if(!iterator(item)){
+        return false;
+      }
+      return true;   
+    },true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
@@ -255,11 +262,35 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    //arguments logs all objs --> we only have one parameter!
+    //arguments - {obj}, {key2, key3}, {bla}
+    _.each(arguments, function(item){
+                    //each(val, key, [array])
+      _.each(item, function(value, key){
+        //NOTE: THIS WILL OVERWRITE EXISTING KEY
+        //First Iteration - item -> {key1: "something"}
+        //rewrites key, 'key1' to same value, 'something'
+        //obj['key1'] = "something" 
+        obj[key] = value;  
+      });
+    });
+    return obj; //return 
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    //arguments logs all objs --> we only have one parameter!
+    //arguments - {obj}, {key2, key3}, {bla}
+    _.each(arguments, function(item){
+                    //each(val, key, [array])
+      _.each(item, function(value, key){
+         //check to see if key has a value
+         if(obj[key] === undefined)
+         obj[key] = value;  
+      });
+    });
+    return obj; //return 
   };
 
 
@@ -312,6 +343,14 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+      //example 'a', 'b' from someFunction('a','b')
+      //typeof func === "function" && 
+                      //built-in(method).call(obj, parameters)
+       var parameters = Array.prototype.slice.call(arguments, 2);
+
+        setTimeout(function(){
+          func.apply(this, parameters);
+        }, wait);
   };
 
 
