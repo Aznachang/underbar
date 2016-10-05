@@ -1,3 +1,4 @@
+
 (function() {
   'use strict';
 
@@ -185,9 +186,7 @@
     var total;
     var first = true;
     /*_.each(collection, function(num){
-
     });
-
     if(arguments.length ===3)
       return total + accumulator;*/
 
@@ -201,6 +200,8 @@
           //total = collection[0];      
                             //(val, index)
           _.each(collection, function(num){
+            //if(first == true)
+            //First - add 1st element into 'collection[0]'
             if(first){
               total = collection[0];      
               first = false;
@@ -228,11 +229,11 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
-    return _.reduce(collection, function(wasFound, item){
-      if(!iterator(item)){
-        return false;
-      }
-      return true;   
+    iterator = iterator || _.identity;
+          //(collection, iterator, accumulator)
+          //!! === Boolean() --> checks to see if 'true' or 'false'
+    return !!_.reduce(collection, function(wasFound, item){
+     return wasFound && iterator(item);
     },true);
   };
 
@@ -240,6 +241,12 @@
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity;
+          //(collection, iterator, accumulator)
+          //!! === Boolean() --> checks to see if 'true' or 'false'
+    return !!_.reduce(collection, function(wasFound, item){
+     return wasFound || iterator(item);
+    },false);
   };
 
 
@@ -316,7 +323,7 @@
     return function() {
       if (!alreadyCalled) {
         // TIP: .apply(this, arguments) is the standard way to pass on all of the
-        // infromation from one function call to another.
+        // information from one function call to another.
         result = func.apply(this, arguments);
         alreadyCalled = true;
       }
@@ -334,6 +341,12 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var storage ={};/*
+    return function(){
+      var args = JSON.stringify(func);
+      if(!storage[args])
+       // return storage[index] = 
+    }*/
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -364,7 +377,23 @@
   // TIP: This function's test suite will ask that you not modify the original
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
+  //WE ASSUME IT WILL TAKE IN JUST ONE PASSED-IN ARGUMENT
   _.shuffle = function(array) {
+    
+    var newArr = [];
+    var copyArr = Array.prototype.slice.call(array);
+
+    //store a new array
+    for(var i =0; i< array.length; i++){
+      //get a random array 'index'
+      var random = Math.floor(Math.random() * copyArr.length);
+      newArr.push(copyArr[random]);
+      
+      //Every Time we push to newArr, 
+      //we need to delete that particular array element 
+      copyArr.splice(random, 1);      //splice(start, deleteCount - should be '1')
+    }
+    return newArr;
   };
 
 
