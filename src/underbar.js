@@ -311,10 +311,19 @@
 
   // Return a function that can be called at most one time. Subsequent calls
   // should return the previously returned value.
+
+                  /**Google Snippet Debug - Once **/
+   // var add = once(function(x,y,z){
+   //     return x+y+z;
+   // });
+   // console.log(add(1,2,3)); //6
+   // console.log(add(4,5,6)); //6
+
   _.once = function(func) {
     // TIP: These variables are stored in a "closure scope" (worth researching),
     // so that they'll remain available to the newly-generated function every
     // time it's called.
+
     var alreadyCalled = false;
     var result;
 
@@ -324,6 +333,7 @@
       if (!alreadyCalled) {
         // TIP: .apply(this, arguments) is the standard way to pass on all of the
         // information from one function call to another.
+                //func.apply(func, arguments)
         result = func.apply(this, arguments);
         alreadyCalled = true;
       }
@@ -340,14 +350,32 @@
   // _.memoize should return a function that, when called, will check if it has
   // already computed the result for the given argument and return that value
   // instead if possible.
+  
+              /**Chrome Snippet Debug - Memoize **/
+     //console.log(add(1,2,3)); // computes '6' - 1st time
+     //console.log(add(1,2,3)); //gives back stored '6' value - 2nd time
+     //console.log(add(6,6,6));
+     //console.log(add(1,2,3)) //givs back stored '6' value - 3rd time
+
   _.memoize = function(func) {
-    var storage ={};/*
-    return function(){
-      var args = JSON.stringify(func);
-      if(!storage[args])
-       // return storage[index] = 
-    }*/
+    var store = {};
+  
+    return function() {
+      var key = JSON.stringify(Array.prototype.slice.call(arguments));
+
+      if(store[key]) {
+        return store[key];
+      }
+      else {
+        var val = func.apply(this, arguments);
+        store[key] = val;
+        return val;
+      }
+    };
+
   };
+
+
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
@@ -359,7 +387,8 @@
       //example 'a', 'b' from someFunction('a','b')
       //typeof func === "function" && 
                       //built-in(method).call(obj, parameters)
-       var parameters = Array.prototype.slice.call(arguments, 2);
+                      //example result --> ['a','b']
+       var parameters = Array.prototype.slice.call(arguments, 2); //[arguments].slice(2);
 
         setTimeout(function(){
           func.apply(this, parameters);
