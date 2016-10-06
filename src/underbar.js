@@ -352,9 +352,18 @@
   // instead if possible.
   
               /**Chrome Snippet Debug - Memoize **/
+      
+      /* var add = memoize(function(x,y,z){
+            return x+y+z;
+        });
+
+         var mult = memoize(function(x,y,z){
+            return x+y+z;
+        })        */ 
+
      //console.log(add(1,2,3)); // computes '6' - 1st time
      //console.log(add(1,2,3)); //gives back stored '6' value - 2nd time
-     //console.log(add(6,6,6));
+     //console.log(add(6,6,6)); //computes '18' - 1st time
      //console.log(add(1,2,3)) //givs back stored '6' value - 3rd time
 
   _.memoize = function(func) {
@@ -374,8 +383,6 @@
     };
 
   };
-
-
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
