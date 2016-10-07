@@ -182,13 +182,10 @@
   //     return total + number * number;
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
+
   _.reduce = function(collection, iterator, accumulator) {
     var total;
     var first = true;
-    /*_.each(collection, function(num){
-    });
-    if(arguments.length ===3)
-      return total + accumulator;*/
 
     if(arguments.length === 3){
       total = accumulator;
@@ -217,11 +214,20 @@
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
-    return _.reduce(collection, function(wasFound, item) {
+    /*return _.reduce(collection, function(wasFound, item) {
       if (wasFound) {
         return true;
       }
       return item === target;
+    }, false);*/
+
+     return _.reduce(collection, function(startValue, curr){
+      if(curr === target){    
+        startValue = true;
+      } 
+      
+      return startValue;
+    
     }, false);
   };
 
@@ -232,8 +238,9 @@
     iterator = iterator || _.identity;
           //(collection, iterator, accumulator)
           //!! === Boolean() --> checks to see if 'true' or 'false'
-    return !!_.reduce(collection, function(wasFound, item){
-     return wasFound && iterator(item);
+    
+    return !!_.reduce(collection, function(startValue, item){
+     return startValue && iterator(item);
     },true);
   };
 
@@ -243,9 +250,14 @@
     // TIP: There's a very clever way to re-use every() here.
     iterator = iterator || _.identity;
           //(collection, iterator, accumulator)
-          //!! === Boolean() --> checks to see if 'true' or 'false'
-    return !!_.reduce(collection, function(wasFound, item){
-     return wasFound || iterator(item);
+       return _.reduce(collection, function(startValue, curr){   //startValue is initially 'false'
+    
+      if (iterator(curr)){
+        startValue = true;
+      }
+      
+      return startValue;
+
     },false);
   };
 
@@ -271,7 +283,7 @@
   _.extend = function(obj) {
     //arguments logs all objs --> we only have one parameter!
     //arguments - {obj}, {key2, key3}, {bla}
-    _.each(arguments, function(item){
+    /*_.each(arguments, function(item){
                     //each(val, key, [array])
       _.each(item, function(value, key){
         //NOTE: THIS WILL OVERWRITE EXISTING KEY
@@ -281,8 +293,17 @@
         obj[key] = value;  
       });
     });
-    return obj; //return 
+    return obj;*/ //return 
+
+      return _.reduce(arguments, function(accum, item){
+
+        for(var prop in item)
+          obj[prop] = item[prop];
+
+        return obj;
+    }, obj);
   };
+
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
