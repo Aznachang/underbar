@@ -184,29 +184,23 @@
   //          No accumulator is given so the first element is used.
 
   _.reduce = function(collection, iterator, accumulator) {
-    var total;
-    var first = true;
 
-    if(arguments.length === 3){
-      total = accumulator;
-        _.each(collection, function(num){
-          total = iterator(total,num);
+    //determine whether we have an accumulator   
+    if(accumulator === undefined){
+      //if no accumulator: set acuumulator == first item in [collection]
+      accumulator = collection[0];
+      collection = collection.slice(1);
+    }
+      //if accumulator: iterate through collection 
+        //use _.each to run iterator function on the accumulator with each 'value' in [collection]
+        _.each(collection, function(currVal){
+          //accumulator is the Total
+          accumulator = iterator(accumulator, currVal);
         });
-      }
-    else{          
-          //total = collection[0];      
-                            //(val, index)
-          _.each(collection, function(num){
-            //if(first == true)
-            //First - add 1st element into 'collection[0]'
-            if(first){
-              total = collection[0];      
-              first = false;
-            }else
-              total = iterator(total, num);
-          });
-        }
-    return total;
+
+        //save it into the accumulator
+    //return the accumulator
+      return accumulator; //accumulator CAN BE 
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -236,9 +230,8 @@
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
     iterator = iterator || _.identity;
-          //(collection, iterator, accumulator)
-          //!! === Boolean() --> checks to see if 'true' or 'false'
-    
+
+          //!! === Boolean() --> checks to see if 'true' or 'false'   
     return !!_.reduce(collection, function(startValue, item){
      return startValue && iterator(item);
     },true);
@@ -379,7 +372,7 @@
         });
 
          var mult = memoize(function(x,y,z){
-            return x+y+z;
+            return x*y*z;
         })        */ 
 
      //console.log(add(1,2,3)); // computes '6' - 1st time
@@ -388,11 +381,13 @@
      //console.log(add(1,2,3)) //givs back stored '6' value - 3rd time
 
   _.memoize = function(func) {
-    var store = {};
-  
+    var store = {}; //this 'object' serves as our cache
+    
+    //return a function that gives us ability to 'memoize' callback function
     return function() {
-      var key = JSON.stringify(Array.prototype.slice.call(arguments));
-
+      var args = Array.prototype.slice.call(arguments); //[arguments]
+      var key = JSON.stringify(args); //"[arguments]"
+      console.log(args);
       if(store[key]) {
         return store[key];
       }
@@ -417,7 +412,7 @@
                       //built-in(method).call(obj, parameters)
                       //example result --> ['a','b']
        var parameters = Array.prototype.slice.call(arguments, 2); //[arguments].slice(2);
-
+       
         setTimeout(function(){
           func.apply(this, parameters);
         }, wait);
@@ -465,6 +460,19 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+
+    return _.map(collection, function(item){
+      var method;
+
+      if(typeof functionOrKey === 'string'){
+        //assume each 'item' from [collection] is an object that has a key of 'func'
+        method = item[functionOrKey]; 
+      }else
+        //case for each 'item' from [collection] is a 'primitive'
+        method = functionOrKey;
+
+      return method.apply(item, args); //method.apply(obj/array, args)
+   })
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -472,6 +480,25 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+      //var sorter;
+      //var args = Array.prototype.slice.call(arguments, 2);
+
+      if(typeof iterator === 'string'){
+         if(iterator === 'length'){
+            return collection.sort(function(a,b){
+              return a.length - b.length;
+            });
+          }
+
+          return collection.sort(function(a,b){
+            return a[iterator] - b[iterator];
+          });
+      }       
+      else if(typeof iterator === 'function')
+        return collection.sort(function(a,b){
+          return iterator(a)- iterator(b);
+        });
+       
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -480,6 +507,33 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+            //1. Find length of longest array in arguments
+        //arguments are subarrays??
+        var args =Array.prototype.slice.call(arguments); //set to [arguments]
+
+        var results = [];
+        var resultsBefore = [];
+        
+        var longest = args.sort(function(a,b){b.length - a.length})[0].length; //this will be a number value....  
+        //2. Iterate through each item in arguments
+        //3. Push each item to correct array
+        for(var i =0; i< longest; i++){
+          for(var j=0; j< arguments.length; j++){
+           /*First Iteration through 'i'*/
+           //[0][0]
+           //[1][0]
+           //[2][0]
+           resultsBefore.push(arguments[j][i]); 
+           //console.log("resultsBefore: " + resultsBefore);
+          }
+
+          results.push(resultsBefore);
+          //console.log("Result: " + results);
+          //console.log("");
+          resultsBefore = [];
+        }
+        return results;
+
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -487,23 +541,97 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    var i =0;
+
+    while(i< nestedArray.length){
+
+        //accumulator starts at empty array --> []
+        //start === []
+                                    //collection, callback, initVal
+      nestedArray =  _.reduce(nestedArray, function(start, currItem){
+       //var i = 0;
+        //[].concat[1] --> [1]
+        //[1].concat[2] --> [1,2]
+        //[1,2].concat[3, [[4]]] --> [1,2,3, [[4]] ]
+
+       // var i = 1;
+        // [1,2,3, [4]];
+
+       // var i = 2; 
+        // [1,2,3,4];
+
+        return start.concat(currItem);  
+      }, []);
+      console.log(JSON.stringify(nestedArray));
+      i++;
+    }
+
+   return nestedArray;
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var inCommon = [];
+
+    _.each(arguments[0], function(item){
+      var isSame = false; //initially is not the same 
+    
+      for(var i = 1; i < args.length; i++){
+          for(var j =0; j<args.length; j++){
+            if(item === args[i][j]){
+              isSame = true;
+            }
+          }
+        }
+
+      if(isSame)
+        inCommon.push(item);
+
+    });        
+                                          
+    return inCommon;
   };
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
-  };
+    var args = Array.prototype.slice.call(arguments);
+    var diffArr = [];
+    
+    //_.difference([1, 2, 3, 4], [2, 30, 40], [1, 11, 111]);
+    //item --> [1] then [2], then [3], then [4]
+    _.each(array, function(item){
+      var isDiff = true;
+      
+      for(var i = 1; i < args.length; i++){
+        for(var j =0; j<args.length; j++){
+          if(item === args[i][j]){
+            isDiff = false;
+          }
+        }
+      }
 
+      if(isDiff)
+        diffArr.push(item);
+    });        
+                                  
+    return diffArr;
+  };
+  
+
+  
   // Returns a function, that, when invoked, will only be triggered at most once
   // during a given window of time.  See the Underbar readme for extra details
   // on this function.
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+        /* var parameters = Array.prototype.slice.call(arguments, 2); //[arguments].slice(2);
+        return func.apply(this, parameters); 
+        setTimeout(function(){
+          func.apply(this, parameters);
+        }, wait); */
   };
 }());
